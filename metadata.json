@@ -1,0 +1,7 @@
+{
+  "name": "PropTrust Singapore",
+  "description": "Singapore HDB resale real estate platform with market search, financial calculators, CPF grant estimator, and official HDB data analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
