@@ -250,6 +250,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
+      {/* Market Stats Quick Table & Live Government Data Feed Callout */}
+      <div className="bg-gradient-to-r from-primary to-primary-container p-6 rounded-2xl text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="bg-secondary text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+              Live Open Data API
+            </span>
+            <span className="text-xs text-white/80 font-mono">data.gov.sg • Jan 2017 to Present</span>
+          </div>
+          <h3 className="text-lg font-bold text-white">
+            Official Singapore HDB Resale Price Dataset Connected
+          </h3>
+          <p className="text-xs text-white/85 max-w-2xl mt-0.5">
+            Query real registered resale transactions, analyze historical psf records, and inspect official dataset metadata schemas directly from government databases.
+          </p>
+        </div>
+        <button
+          onClick={() => onTabChange('market-analysis')}
+          className="bg-white text-primary font-semibold text-xs px-4 py-2.5 rounded-lg shadow hover:bg-surface transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0"
+        >
+          <span className="material-symbols-outlined text-[16px]">database</span>
+          <span>Explore Live Transactions</span>
+        </button>
+      </div>
+
       {/* Market Stats Quick Table */}
       <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-variant shadow-xs">
         <div className="flex items-center justify-between mb-4">

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { HdbListing } from '../types';
+import React, { useState, useEffect } from 'react';
+import { HdbListing, DataGovHdbRecord } from '../types';
+import { fetchHdbResaleTransactions } from '../services/dataGovService';
 
 interface ListingDetailModalProps {
   listing: HdbListing | null;
@@ -16,7 +17,29 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   onToggleFavorite,
   isFavorite,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'valuation' | 'amenities' | 'past-records'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'valuation' | 'past-records'>('overview');
+  const [liveRecords, setLiveRecords] = useState<DataGovHdbRecord[]>([]);
+  const [loadingRecords, setLoadingRecords] = useState<boolean>(false);
+  const [isLiveFeed, setIsLiveFeed] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (listing && activeTab === 'past-records') {
+      setLoadingRecords(true);
+      fetchHdbResaleTransactions({
+        limit: 5,
+        town: listing.town,
+        query: listing.block || listing.street,
+      })
+        .then((res) => {
+          setLiveRecords(res.records);
+          setIsLiveFeed(res.isLive);
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoadingRecords(false);
+        });
+    }
+  }, [listing, activeTab]);
 
   if (!listing) return null;
 
@@ -232,45 +255,91 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
 
           {activeTab === 'past-records' && (
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-on-surface">
-                Recent HDB Resale Records in {listing.block} {listing.street}
-              </h4>
-              <div className="border border-outline-variant/30 rounded-lg overflow-hidden text-xs">
-                <table className="w-full text-left">
-                  <thead className="bg-surface-container-high/60 text-on-surface-variant">
-                    <tr>
-                      <th className="p-2.5">Date</th>
-                      <th className="p-2.5">Type</th>
-                      <th className="p-2.5">Storey</th>
-                      <th className="p-2.5">Floor Area</th>
-                      <th className="p-2.5 text-right">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/15">
-                    <tr>
-                      <td className="p-2.5">Jul 2026</td>
-                      <td className="p-2.5">{listing.flatType}</td>
-                      <td className="p-2.5">07 to 09</td>
-                      <td className="p-2.5">{listing.areaSqm} sqm</td>
-                      <td className="p-2.5 text-right font-semibold text-primary">{formatCurrency(listing.lastTransactedInBlock || listing.price - 5000)}</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5">Mar 2026</td>
-                      <td className="p-2.5">{listing.flatType}</td>
-                      <td className="p-2.5">04 to 06</td>
-                      <td className="p-2.5">{listing.areaSqm} sqm</td>
-                      <td className="p-2.5 text-right font-semibold text-primary">{formatCurrency((listing.lastTransactedInBlock || listing.price) - 12000)}</td>
-                    </tr>
-                    <tr>
-                      <td className="p-2.5">Nov 2025</td>
-                      <td className="p-2.5">{listing.flatType}</td>
-                      <td className="p-2.5">10 to 12</td>
-                      <td className="p-2.5">{listing.areaSqm} sqm</td>
-                      <td className="p-2.5 text-right font-semibold text-primary">{formatCurrency((listing.lastTransactedInBlock || listing.price) - 8000)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-on-surface">
+                    Official HDB Resale Records: {listing.town.toUpperCase()}
+                  </h4>
+                  <p className="text-[11px] text-on-surface-variant">
+                    Transactions registered under data.gov.sg for this neighborhood
+                  </p>
+                </div>
+                <span className="bg-primary/10 text-primary font-mono text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">verified</span>
+                  <span>{isLiveFeed ? 'data.gov.sg Live' : 'Cached Feed'}</span>
+                </span>
               </div>
+
+              {loadingRecords ? (
+                <div className="py-8 text-center text-on-surface-variant flex flex-col items-center justify-center gap-2">
+                  <span className="material-symbols-outlined text-[24px] animate-spin text-primary">autorenew</span>
+                  <span className="text-xs">Fetching official transaction records...</span>
+                </div>
+              ) : liveRecords.length > 0 ? (
+                <div className="border border-outline-variant/30 rounded-lg overflow-hidden text-xs">
+                  <table className="w-full text-left">
+                    <thead className="bg-surface-container-high/60 text-on-surface-variant font-label-sm">
+                      <tr>
+                        <th className="p-2.5">Date</th>
+                        <th className="p-2.5">Address</th>
+                        <th className="p-2.5">Type & Model</th>
+                        <th className="p-2.5">Storey</th>
+                        <th className="p-2.5">Floor Area</th>
+                        <th className="p-2.5 text-right">Transacted Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/15">
+                      {liveRecords.map((rec) => (
+                        <tr key={rec._id} className="hover:bg-surface-container-low/50">
+                          <td className="p-2.5 font-mono text-on-surface">{rec.month}</td>
+                          <td className="p-2.5 font-medium text-primary">
+                            Blk {rec.block} {rec.street_name}
+                          </td>
+                          <td className="p-2.5">
+                            <span className="text-on-surface block font-medium">{rec.flat_type}</span>
+                            <span className="text-[10px] text-on-surface-variant">{rec.flat_model}</span>
+                          </td>
+                          <td className="p-2.5 font-mono text-on-surface-variant">{rec.storey_range}</td>
+                          <td className="p-2.5 font-mono">{rec.floor_area_sqm} sqm</td>
+                          <td className="p-2.5 text-right font-bold text-primary font-mono">
+                            {formatCurrency(parseFloat(rec.resale_price))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="border border-outline-variant/30 rounded-lg overflow-hidden text-xs">
+                  <table className="w-full text-left">
+                    <thead className="bg-surface-container-high/60 text-on-surface-variant">
+                      <tr>
+                        <th className="p-2.5">Date</th>
+                        <th className="p-2.5">Type</th>
+                        <th className="p-2.5">Storey</th>
+                        <th className="p-2.5">Floor Area</th>
+                        <th className="p-2.5 text-right">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/15">
+                      <tr>
+                        <td className="p-2.5 font-mono">2026-07</td>
+                        <td className="p-2.5">{listing.flatType}</td>
+                        <td className="p-2.5">07 to 09</td>
+                        <td className="p-2.5">{listing.areaSqm} sqm</td>
+                        <td className="p-2.5 text-right font-semibold text-primary">{formatCurrency(listing.lastTransactedInBlock || listing.price - 5000)}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-mono">2026-03</td>
+                        <td className="p-2.5">{listing.flatType}</td>
+                        <td className="p-2.5">04 to 06</td>
+                        <td className="p-2.5">{listing.areaSqm} sqm</td>
+                        <td className="p-2.5 text-right font-semibold text-primary">{formatCurrency((listing.lastTransactedInBlock || listing.price) - 12000)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </div>

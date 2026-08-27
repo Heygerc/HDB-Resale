@@ -89,3 +89,55 @@ export interface AffordabilityResult {
   propTrustConsultantFee: number;
   transactionSavings: number;
 }
+
+export interface DataGovHdbRecord {
+  _id: number;
+  month: string;
+  town: string;
+  flat_type: string;
+  block: string;
+  street_name: string;
+  storey_range: string;
+  floor_area_sqm: string;
+  flat_model: string;
+  lease_commence_date: string;
+  remaining_lease: string;
+  resale_price: string;
+}
+
+export interface DataGovSearchResult {
+  success: boolean;
+  result?: {
+    resource_id: string;
+    total?: number;
+    limit?: number;
+    records: DataGovHdbRecord[];
+    fields?: Array<{ type: string; id: string }>;
+    _links?: Record<string, string>;
+  };
+  error?: {
+    message: string;
+  };
+}
+
+export interface DataGovMetadata {
+  datasetId: string;
+  name: string;
+  description: string;
+  managedBy: string;
+  lastUpdatedAt: string;
+  coverageStart: string;
+  coverageEnd: string;
+  datasetSize: number;
+  format: string;
+  columnMetadata?: {
+    order: string[];
+    map: Record<string, string>;
+    metaMapping: Record<string, {
+      name: string;
+      columnTitle: string;
+      dataType: string;
+      description?: string;
+    }>;
+  };
+}

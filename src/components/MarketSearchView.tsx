@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { HdbListing, TabType } from '../types';
 import { TAMPINES_MAP_BG } from '../data/mockData';
+import { OfficialHdbTransactionsExplorer } from './OfficialHdbTransactionsExplorer';
 
 interface MarketSearchViewProps {
   listings: HdbListing[];
@@ -31,6 +32,7 @@ export const MarketSearchView: React.FC<MarketSearchViewProps> = ({
   const [remainingLease, setRemainingLease] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('Recommended');
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'listings' | 'official-api'>('listings');
 
   // Amenity toggles on map
   const [showCafes, setShowCafes] = useState<boolean>(true);
@@ -422,37 +424,71 @@ export const MarketSearchView: React.FC<MarketSearchViewProps> = ({
             </div>
           </div>
 
-          {/* Results List */}
+          {/* Results List or Official Live Feed */}
           <div className="flex-1 flex flex-col bg-surface-container-lowest rounded-xl shadow-xs border border-outline-variant/30 overflow-hidden">
-            <div className="px-6 py-4 border-b border-outline-variant/30 flex flex-wrap justify-between items-center bg-surface-container-low/50 gap-2">
-              <div>
-                <h2 className="text-title-md font-title-md text-on-surface font-semibold">
-                  Available Listings
-                </h2>
-                <p className="text-label-sm font-label-sm text-on-surface-variant">
-                  Showing {filteredListings.length} properties matching your criteria
-                </p>
+            <div className="px-6 py-4 border-b border-outline-variant/30 flex flex-wrap justify-between items-center bg-surface-container-low/50 gap-3">
+              <div className="flex items-center gap-2">
+                <div className="flex bg-surface-container rounded-lg p-0.5 border border-outline-variant/30">
+                  <button
+                    id="switch-curated-listings-btn"
+                    onClick={() => setViewMode('listings')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      viewMode === 'listings'
+                        ? 'bg-white text-primary shadow-xs'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">apartment</span>
+                    <span>Curated Listings ({filteredListings.length})</span>
+                  </button>
+                  <button
+                    id="switch-official-feed-btn"
+                    onClick={() => setViewMode('official-api')}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                      viewMode === 'official-api'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'text-on-surface-variant hover:text-on-surface'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
+                    <span>data.gov.sg Live Feed</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider text-xs">
-                  Sort By:
+              {viewMode === 'listings' ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider text-xs">
+                    Sort By:
+                  </span>
+                  <select
+                    id="sort-listings-select"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-surface border border-outline-variant/30 text-body-md font-body-md text-primary font-medium py-1 px-3 rounded-md cursor-pointer outline-none focus:ring-1 focus:ring-primary/50 text-xs"
+                  >
+                    <option value="Recommended">Recommended</option>
+                    <option value="Price: Low to High">Price: Low to High</option>
+                    <option value="Price: High to Low">Price: High to Low</option>
+                    <option value="Newest">Newest</option>
+                  </select>
+                </div>
+              ) : (
+                <span className="text-xs font-mono text-primary font-medium bg-primary/10 px-2.5 py-1 rounded">
+                  Official HDB Records Jan 2017 - Present
                 </span>
-                <select
-                  id="sort-listings-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-surface border border-outline-variant/30 text-body-md font-body-md text-primary font-medium py-1 px-3 rounded-md cursor-pointer outline-none focus:ring-1 focus:ring-primary/50 text-xs"
-                >
-                  <option value="Recommended">Recommended</option>
-                  <option value="Price: Low to High">Price: Low to High</option>
-                  <option value="Price: High to Low">Price: High to Low</option>
-                  <option value="Newest">Newest</option>
-                </select>
-              </div>
+              )}
             </div>
 
-            {/* Cards Grid */}
+            {viewMode === 'official-api' ? (
+              <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                <OfficialHdbTransactionsExplorer
+                  initialTown={selectedTown || 'TAMPINES'}
+                  initialFlatType={flatTypes[0] || '4 ROOM'}
+                />
+              </div>
+            ) : (
+            /* Cards Grid */
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6 custom-scrollbar">
               {filteredListings.map((listing) => {
                 const isFav = favorites.includes(listing.id);
@@ -556,6 +592,7 @@ export const MarketSearchView: React.FC<MarketSearchViewProps> = ({
                 );
               })}
             </div>
+            )}
           </div>
         </div>
       </div>

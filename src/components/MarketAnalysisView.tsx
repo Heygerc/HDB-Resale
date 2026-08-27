@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HDB_ESTATE_STATS } from '../data/mockData';
 import { TabType } from '../types';
+import { OfficialHdbTransactionsExplorer } from './OfficialHdbTransactionsExplorer';
 
 interface MarketAnalysisViewProps {
   onTabChange: (tab: TabType) => void;
@@ -158,6 +159,9 @@ export const MarketAnalysisView: React.FC<MarketAnalysisViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Official Singapore HDB Resale Data Explorer (data.gov.sg API) */}
+      <OfficialHdbTransactionsExplorer />
 
       {/* MOP (5-Year Minimum Occupation Period) Cluster Radar */}
       <div className="bg-surface-container-lowest p-6 sm:p-8 rounded-xl border border-surface-variant shadow-xs">
