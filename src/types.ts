@@ -1,4 +1,4 @@
-export type TabType = 'dashboard' | 'market-search' | 'financial-tools' | 'my-viewings' | 'market-analysis';
+export type TabType = 'dashboard' | 'market-search' | 'financial-tools' | 'my-viewings' | 'market-analysis' | 'community';
 
 export type ApplicantProfile = 'first-timer-family' | 'first-timer-singles' | 'second-timer-family' | 'joint-singles';
 

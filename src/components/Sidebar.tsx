@@ -25,6 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'financial-tools', label: 'Financial Tools', icon: 'calculate' },
     { id: 'my-viewings', label: 'My Viewings', icon: 'calendar_today' },
     { id: 'market-analysis', label: 'Market Analysis', icon: 'insights' },
+    { id: 'community', label: 'Community Forum', icon: 'forum' },
   ];
 
   return (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { HDB_ESTATE_STATS } from '../data/mockData';
 import { TabType } from '../types';
 import { OfficialHdbTransactionsExplorer } from './OfficialHdbTransactionsExplorer';
+import { DisqusThread } from './DisqusThread';
 
 interface MarketAnalysisViewProps {
   onTabChange: (tab: TabType) => void;
@@ -210,6 +211,13 @@ export const MarketAnalysisView: React.FC<MarketAnalysisViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Disqus Market Analysis & Community Opinions Section */}
+      <DisqusThread
+        identifier="proptrust-market-analysis-discussion"
+        title="Singapore HDB Resale & MOP Market Intelligence Forum"
+        category="Market Dynamics, Price Projections & Buyer Sentiment"
+      />
     </div>
   );
 };

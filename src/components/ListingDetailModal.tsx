@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HdbListing, DataGovHdbRecord } from '../types';
 import { fetchHdbResaleTransactions } from '../services/dataGovService';
+import { DisqusThread } from './DisqusThread';
 
 interface ListingDetailModalProps {
   listing: HdbListing | null;
@@ -17,7 +18,7 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
   onToggleFavorite,
   isFavorite,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'valuation' | 'past-records'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'valuation' | 'past-records' | 'discussions'>('overview');
   const [liveRecords, setLiveRecords] = useState<DataGovHdbRecord[]>([]);
   const [loadingRecords, setLoadingRecords] = useState<boolean>(false);
   const [isLiveFeed, setIsLiveFeed] = useState<boolean>(true);
@@ -153,6 +154,18 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
             }`}
           >
             Block Past Transactions
+          </button>
+          <button
+            id="tab-listing-discussions"
+            onClick={() => setActiveTab('discussions')}
+            className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+              activeTab === 'discussions'
+                ? 'border-primary text-primary font-semibold'
+                : 'border-transparent text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">forum</span>
+            <span>Buyer Reviews & Q&A</span>
           </button>
         </div>
 
@@ -340,6 +353,31 @@ export const ListingDetailModal: React.FC<ListingDetailModalProps> = ({
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === 'discussions' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/20 flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-on-surface">
+                    Community Reviews & Inquiries for Blk {listing.block} {listing.street}
+                  </h4>
+                  <p className="text-xs text-on-surface-variant">
+                    Leave your comments, questions on unit facing, renovation history, or neighbor observations.
+                  </p>
+                </div>
+                <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase px-2 py-0.5 rounded-full font-mono">
+                  Disqus Feed
+                </span>
+              </div>
+
+              <DisqusThread
+                identifier={`proptrust-listing-${listing.id}`}
+                title={`Blk ${listing.block} ${listing.street} (${listing.flatType}) - Reviews & Discussion`}
+                category={`PropTrust Property Review • ${listing.town}`}
+                compact={true}
+              />
             </div>
           )}
         </div>

@@ -13,6 +13,7 @@ import { MarketSearchView } from './components/MarketSearchView';
 import { DashboardView } from './components/DashboardView';
 import { MyViewingsView } from './components/MyViewingsView';
 import { MarketAnalysisView } from './components/MarketAnalysisView';
+import { CommunityForumView } from './components/CommunityForumView';
 import { ListingDetailModal } from './components/ListingDetailModal';
 import { BookViewingModal } from './components/BookViewingModal';
 
@@ -169,6 +170,12 @@ export default function App() {
             <MarketAnalysisView
               onTabChange={setCurrentTab}
               consultantMode={consultantMode}
+            />
+          )}
+
+          {currentTab === 'community' && (
+            <CommunityForumView
+              onTabChange={setCurrentTab}
             />
           )}
         </main>
